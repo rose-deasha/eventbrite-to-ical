@@ -25,3 +25,13 @@ function downloadIcal() {
         alert("An error occurred: " + error.message);
     });
 }
+
+document.getElementById('authorize-btn').addEventListener('click', function() {
+    const clientId = 'YOUR_CLIENT_ID';  // Your API key (Client ID)
+    const redirectUri = 'https://backend-1-2x3i.onrender.com/oauth/callback';  // Your backend redirect URI
+    const authUrl = `https://www.eventbrite.com/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+    
+    // Redirect the user to Eventbrite’s authorization URL
+    window.location.href = authUrl;
+});
+

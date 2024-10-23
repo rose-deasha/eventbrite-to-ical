@@ -3,8 +3,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const authorizeBtn = document.getElementById('authorize-btn');
     const icalBtn = document.getElementById('ical-btn');
     
-    // Check if we're returning from OAuth redirect
-    checkForAuthCode();
+    // Check if we're returning from OAuth redirect with access token
+    checkForAccessToken();
     
     if (authorizeBtn) {
         authorizeBtn.addEventListener('click', initiateOAuthFlow);
@@ -13,6 +13,9 @@ document.addEventListener('DOMContentLoaded', function() {
     if (icalBtn) {
         icalBtn.addEventListener('click', handleIcalDownload);
     }
+
+    // Update UI based on authorization state
+    updateUIForAuthorizedState();
 });
 
 function initiateOAuthFlow() {
@@ -23,54 +26,29 @@ function initiateOAuthFlow() {
     // Set up OAuth parameters
     const params = new URLSearchParams({
         response_type: 'code',
-        client_id: 'YOUR_CLIENT_ID', // Replace with your Eventbrite app's client ID
-        redirect_uri: 'YOUR_FRONTEND_URL', // Your frontend URL (e.g., https://yourdomain.com/callback)
-        state: state,
-        scope: 'event_list_venues event_list_tickets' // Add required scopes
+        client_id: 'YOUR_CLIENT_ID', // Replace with your Eventbrite client ID
+        redirect_uri: 'https://backend-1-2x3i.onrender.com/oauth/callback',
+        state: state
     });
 
     // Redirect to Eventbrite's authorization page
     window.location.href = `https://www.eventbrite.com/oauth/authorize?${params.toString()}`;
 }
 
-function checkForAuthCode() {
+function checkForAccessToken() {
     const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get('code');
-    const state = urlParams.get('state');
-    const savedState = localStorage.getItem('oauth_state');
+    const accessToken = urlParams.get('access_token');
     
-    if (code && state && state === savedState) {
-        // Clear the saved state
-        localStorage.removeItem('oauth_state');
-        
-        // Exchange code for access token
-        exchangeCodeForToken(code);
+    if (accessToken) {
+        // Store the access token
+        localStorage.setItem('eventbrite_access_token', accessToken);
+        // Update UI
+        updateUIForAuthorizedState();
+        // Show success message
+        showMessage('Successfully connected to Eventbrite!', 'success');
+        // Clean up URL
+        window.history.replaceState({}, document.title, window.location.pathname);
     }
-}
-
-function exchangeCodeForToken(code) {
-    fetch('YOUR_BACKEND_URL/exchange-code', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ code })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.access_token) {
-            localStorage.setItem('eventbrite_access_token', data.access_token);
-            updateUIForAuthorizedState();
-            // Optional: Show success message
-            showMessage('Successfully connected to Eventbrite!', 'success');
-        } else {
-            throw new Error('Failed to get access token');
-        }
-    })
-    .catch(error => {
-        console.error('Authorization error:', error);
-        showMessage('Failed to authorize with Eventbrite. Please try again.', 'error');
-    });
 }
 
 function handleIcalDownload() {
@@ -81,18 +59,8 @@ function handleIcalDownload() {
         return;
     }
     
-    fetch('YOUR_BACKEND_URL/create-ical', {
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${accessToken}`
-        }
-    })
-    .then(handleResponse)
-    .then(downloadFile)
-    .catch(error => {
-        console.error('Download error:', error);
-        showMessage('Failed to download events. Please try again.', 'error');
-    });
+    // Redirect to the backend's iCal endpoint
+    window.location.href = `https://backend-1-2x3i.onrender.com/events/ical?access_token=${accessToken}`;
 }
 
 function updateUIForAuthorizedState() {
@@ -100,30 +68,18 @@ function updateUIForAuthorizedState() {
     const icalBtn = document.getElementById('ical-btn');
     
     if (localStorage.getItem('eventbrite_access_token')) {
-        authorizeBtn.textContent = 'Reauthorize with Eventbrite';
-        icalBtn.disabled = false;
+        if (authorizeBtn) authorizeBtn.textContent = 'Reauthorize with Eventbrite';
+        if (icalBtn) {
+            icalBtn.disabled = false;
+            icalBtn.classList.remove('disabled');
+        }
     } else {
-        authorizeBtn.textContent = 'Authorize with Eventbrite';
-        icalBtn.disabled = true;
+        if (authorizeBtn) authorizeBtn.textContent = 'Authorize with Eventbrite';
+        if (icalBtn) {
+            icalBtn.disabled = true;
+            icalBtn.classList.add('disabled');
+        }
     }
-}
-
-function handleResponse(response) {
-    if (!response.ok) {
-        throw new Error(`Error: ${response.status}`);
-    }
-    return response.blob();
-}
-
-function downloadFile(blob) {
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'eventbrite_events.ics';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
 }
 
 function showMessage(message, type = 'info') {

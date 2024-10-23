@@ -38,13 +38,22 @@
       border: none;
       border-radius: 5px;
     }
+    button#authorize-btn {
+      background-color: #007bff; /* Blue background for authorize button */
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Eventbrite to iCal Converter</h1>
     <p>Enter your Eventbrite API Key to download your events as an iCal file.</p>
+    
+    <!-- Input field for Eventbrite API key -->
     <input type="text" id="apiKey" placeholder="Enter Eventbrite API Key">
+    <br>
+
+    <!-- Buttons: one to authorize and another to download the iCal -->
+    <button id="authorize-btn">Authorize with Eventbrite</button>
     <br>
     <button onclick="downloadIcal()">Download iCal</button>
   </div>
@@ -52,5 +61,4 @@
   <!-- Link the external JavaScript file -->
   <script src="script.js"></script>
 </body>
-<button id="authorize-btn">Authorize with Eventbrite</button>
 </html>

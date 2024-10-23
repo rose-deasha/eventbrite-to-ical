@@ -6,7 +6,7 @@ function downloadIcal() {
     }
 
     // Make a request to the backend with the API key
-    fetch('https://YOUR_BACKEND_URL/create-ical', {
+    fetch('https://backend-1-2x3i.onrender.com/create-ical', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ apiKey })

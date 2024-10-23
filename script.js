@@ -3,9 +3,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const authorizeBtn = document.getElementById('authorize-btn');
     const icalBtn = document.getElementById('ical-btn');
     
-    // Check if we're returning from OAuth redirect with access token
-    checkForAccessToken();
-    
     if (authorizeBtn) {
         authorizeBtn.addEventListener('click', initiateOAuthFlow);
     }
@@ -13,6 +10,23 @@ document.addEventListener('DOMContentLoaded', function() {
     if (icalBtn) {
         icalBtn.addEventListener('click', handleIcalDownload);
     }
+});
+async function initiateOAuthFlow() {
+    // Generate a random state parameter for security
+    const state = Math.random().toString(36).substring(7);
+    localStorage.setItem('oauth_state', state);
+    
+    // Set up OAuth parameters
+    const params = new URLSearchParams({
+        response_type: 'code',
+        client_id: 'PHHM2PYIQEAKD7ZVUKV5', // This is your public client ID
+        redirect_uri: 'https://backend-1-2x3i.onrender.com/oauth/callback',
+        state: state
+    });
+
+    // Redirect to Eventbrite's authorization page
+    window.location.href = `https://www.eventbrite.com/oauth/authorize?${params.toString()}`;
+}
 
     // Update UI based on authorization state
     updateUIForAuthorizedState();

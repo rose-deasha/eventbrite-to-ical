@@ -1,0 +1,15 @@
+#authorize-btn {
+    display: block;
+    margin: 0 auto;
+    padding: 10px 20px;
+    background-color: #4CAF50; /* Green */
+    color: white;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    font-size: 16px;
+}
+
+#authorize-btn:hover {
+    background-color: #45a049;
+}

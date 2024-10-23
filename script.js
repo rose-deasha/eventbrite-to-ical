@@ -44,7 +44,7 @@ function initiateOAuthFlow() {
         // Set up OAuth parameters
         const params = new URLSearchParams({
             response_type: 'code',
-            client_id: 'PHHM2PYIQEAKD7ZVUKV5',
+            client_id: 'DKC5PJR4CSVOCX7WZY',
             redirect_uri: 'https://backend-1-2x3i.onrender.com/oauth/callback',
             state: state
         });
